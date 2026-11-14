@@ -22,7 +22,21 @@ const FEATURE_ICONS = [Award, Layers, PlaySquare, ShieldCheck, FileCheck2];
 
 export const HomePage: React.FC = () => {
   const { lang, t, bootstrap } = useApp();
-  const featuredCourses = bootstrap?.featured_courses || [];
+  const featuredCourses = (bootstrap?.featured_courses || []).map((course: any) => ({
+    ...course,
+    title: course.title && typeof course.title === 'object'
+      ? course.title[lang] || course.title.ar || course.title.en || ''
+      : course.title || '',
+    title_en: course.title_en || (typeof course.title === 'object' ? course.title.en : ''),
+    description: course.description && typeof course.description === 'object'
+      ? course.description[lang] || course.description.ar || course.description.en || ''
+      : course.description || '',
+    description_en: course.description_en || (typeof course.description === 'object' ? course.description.en : ''),
+    cover_image_url: course.cover_image_url || '',
+    teacher_name: course.teacher_name || course.instructor_name || '',
+    category: course.category || course.course_type || '',
+    duration_minutes: course.duration_minutes || null,
+  }));
   const ArrowIcon = lang === 'ar' ? ArrowLeft : ArrowRight;
 
   return (
