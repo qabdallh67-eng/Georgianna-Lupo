@@ -12,19 +12,19 @@ import {
   authenticateRequest,
   requireAuthorizedAdmin,
   writeAuditLog,
-} from './server/supabaseAdmin';
-import { signPlaybackToken, verifyPlaybackToken } from './server/securityToken';
+} from './server/supabaseAdmin.js';
+import { signPlaybackToken, verifyPlaybackToken } from './server/securityToken.js';
 import {
   normalizePhone,
   validateRegistrationInput,
   sanitizeStudentProfilePatch,
-} from './src/lib/validation';
+} from './src/lib/validation.js';
 import {
   stripAnswerKeysForStudent,
   gradeExamSubmission,
   shuffleWithSeed,
-} from './src/lib/examEngine';
-import { buildWatermarkPayload, calculateCourseCompletion } from './src/lib/securityEngine';
+} from './src/lib/examEngine.js';
+import { buildWatermarkPayload, calculateCourseCompletion } from './src/lib/securityEngine.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const VIDEO_TOKEN_SECRET =
