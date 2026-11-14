@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Request, Response } from 'express';
-import { hasAdminPermission } from '../src/lib/securityEngine';
+import { hasAdminPermission } from '../src/lib/securityEngine.js';
 
 const DEFAULT_SUPABASE_URL = 'https://suldaiuxaxremmfxodak.supabase.co';
 
