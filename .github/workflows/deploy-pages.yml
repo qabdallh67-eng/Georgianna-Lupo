@@ -32,8 +32,8 @@ jobs:
       - name: Build site
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: https://suldaiuxaxremmfxodak.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_2DNkpNQLXsqD10FafiaEIA_9pz90chV
 
       - name: Prepare GitHub Pages files
         run: |
