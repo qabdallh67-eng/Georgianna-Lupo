@@ -464,12 +464,34 @@ export async function createApp() {
         ? rawIdentifier.toLowerCase()
         : normalizePhone(rawIdentifier);
 
-      const query = admin.from('profiles').select('*');
-      const { data: profile } = rawIdentifier.includes('@')
-        ? await query.eq('email', normalized).maybeSingle()
-        : await query.eq('phone', normalized).maybeSingle();
+      let profileQuery = admin.from('profiles').select('*');
+      if (rawIdentifier.includes('@')) {
+        profileQuery = profileQuery.eq('email', normalized);
+      } else {
+        const { data: resolvedEmail, error: resolveError } = await admin.rpc(
+          'resolve_student_login_email',
+          { p_phone: normalized }
+        );
+        if (resolveError) {
+          console.error('[auth] phone email resolution failed:', resolveError.message);
+          return res.status(503).json({
+            error: 'PHONE_LOGIN_UNAVAILABLE',
+            message_ar: 'خدمة تسجيل الدخول برقم الهاتف غير متاحة مؤقتاً.',
+            message_en: 'Phone sign-in is temporarily unavailable.',
+          });
+        }
+        if (!resolvedEmail) {
+          return res.status(401).json({
+            error: 'INVALID_CREDENTIALS',
+            message_ar: 'رقم الهاتف أو كلمة المرور غير صحيحة.',
+            message_en: 'Invalid phone number or password.',
+          });
+        }
+        profileQuery = profileQuery.eq('email', resolvedEmail);
+      }
 
-      if (!profile || !profile.email) {
+      const { data: profile, error: profileError } = await profileQuery.maybeSingle();
+      if (profileError || !profile || !profile.email) {
         return res.status(401).json({
           error: 'INVALID_CREDENTIALS',
           message_ar: 'رقم الهاتف أو كلمة المرور غير صحيحة.',
@@ -477,19 +499,7 @@ export async function createApp() {
         });
       }
 
-      const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({
-        email: profile.email,
-        password,
-      });
-
-      if (signInErr || !signInData.session) {
-        return res.status(401).json({
-          error: 'INVALID_CREDENTIALS',
-          message_ar: 'رقم الهاتف أو كلمة المرور غير صحيحة.',
-          message_en: 'Invalid phone number or password.',
-        });
-      }
-
+      // Reject unapproved accounts before creating an authentication session.
       if (profile.account_status === 'pending') {
         return res.status(403).json({
           error: 'ACCOUNT_PENDING',
@@ -503,6 +513,19 @@ export async function createApp() {
           error: 'ACCOUNT_SUSPENDED',
           message_ar: 'تم إيقاف هذا الحساب أو تعليقه. يرجى التواصل مع إدارة المنصة.',
           message_en: 'This account has been suspended or rejected.',
+        });
+      }
+
+      const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({
+        email: profile.email,
+        password,
+      });
+
+      if (signInErr || !signInData.session) {
+        return res.status(401).json({
+          error: 'INVALID_CREDENTIALS',
+          message_ar: 'رقم الهاتف أو كلمة المرور غير صحيحة.',
+          message_en: 'Invalid phone number or password.',
         });
       }
 
