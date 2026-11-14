@@ -141,7 +141,7 @@ const DEFAULT_BOOTSTRAP = {
   },
 };
 
-async function startServer() {
+export async function createApp() {
   const app = express();
   app.set('trust proxy', 1);
 
@@ -222,7 +222,7 @@ async function startServer() {
         coursesCountRes,
         lessonsCountRes,
       ] = await Promise.all([
-        admin.from('site_settings').select('*').eq('id', 1).maybeSingle(),
+        admin.from('site_settings').select('*').eq('id', true).maybeSingle(),
         admin.from('theme_settings').select('*').eq('id', 1).maybeSingle(),
         admin.from('media_assets').select('*').eq('is_private', false),
         admin.from('navigation_items').select('*').eq('is_visible', true).order('sort_order'),
@@ -230,7 +230,7 @@ async function startServer() {
         admin.from('page_content').select('*'),
         admin
           .from('courses')
-          .select('id, slug, title, title_en, description, description_en, cover_image_url, teacher_name, category, grade_level, price, currency, duration_minutes, is_featured, is_published')
+          .select('id, slug, title, description, cover_asset_id, instructor_name, course_type, grade_key, price, currency, is_published')
           .eq('is_published', true)
           .order('is_featured', { ascending: false })
           .limit(6),
@@ -355,7 +355,7 @@ async function startServer() {
         .eq('id', 1)
         .maybeSingle();
 
-      const requireApproval = settings?.require_student_approval ?? true;
+      const requireApproval = settings?.settings?.require_student_approval ?? true;
       const initialStatus = requireApproval ? 'pending' : 'approved';
 
       // Create user in Supabase Auth (always strictly student role)
@@ -385,7 +385,7 @@ async function startServer() {
         phone: validation.normalizedPhone,
         guardian_phone: validation.normalizedGuardianPhone,
         email: validation.normalizedEmail,
-        grade_level: req.body.gradeLevel || null,
+        grade_key: req.body.gradeLevel || null,
         role: 'student',
         account_status: initialStatus,
         preferred_language: locale,
@@ -403,9 +403,7 @@ async function startServer() {
       // Initialize zero-balance student wallet
       await admin.from('wallets').upsert({
         student_id: userId,
-        current_balance: 0,
-        available_balance: 0,
-        currency: settings?.default_currency || 'EGP',
+        currency: settings?.settings?.default_currency || 'EGP',
       });
 
       await writeAuditLog({
@@ -1591,10 +1589,10 @@ async function startServer() {
     const admin = getSupabaseAdmin()!;
 
     if (req.body?.site_settings) {
-      await admin.from('site_settings').upsert({ id: 1, ...req.body.site_settings, updated_at: new Date().toISOString() });
+      await admin.from('site_settings').upsert({ id: true, ...req.body.site_settings, updated_at: new Date().toISOString() });
     }
     if (req.body?.theme_settings) {
-      await admin.from('theme_settings').upsert({ id: 1, ...req.body.theme_settings, updated_at: new Date().toISOString() });
+      await admin.from('theme_settings').upsert({ id: true, ...req.body.theme_settings, updated_at: new Date().toISOString() });
     }
     await writeAuditLog({ actorId: adminCtx.userId, action: 'settings_updated', targetTable: 'site_settings', ipAddress: req.ip });
     return res.json({ ok: true });
@@ -1667,23 +1665,29 @@ async function startServer() {
   // --------------------------------------------------------------------------
   // 11. Vite Dev Middleware / Production Static Serving
   // --------------------------------------------------------------------------
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.resolve(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+  if (!process.env.VERCEL) {
+    if (process.env.NODE_ENV !== 'production') {
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
+    } else {
+      const distPath = path.resolve(process.cwd(), 'dist');
+      app.use(express.static(distPath));
+      app.get('*', (_req, res) => {
+        res.sendFile(path.join(distPath, 'index.html'));
+      });
+    }
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`EDUVERSE server running on http://0.0.0.0:${PORT}`);
-  });
+  return app;
 }
 
-startServer();
+if (!process.env.VERCEL) {
+  createApp().then((app) => {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`EDUVERSE server running on http://0.0.0.0:${PORT}`);
+    });
+  });
+}
