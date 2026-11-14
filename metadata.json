@@ -1,0 +1,8 @@
+{
+  "name": "EDUVERSE — منصة إيديوفيرس التعليمية",
+  "description": "منصة EDUVERSE التعليمية المتكاملة لتعلم البرمجة والعلوم، بث فيديو محمي، امتحانات ذكية، محفظة إلكترونية، ومنتدى طلابي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

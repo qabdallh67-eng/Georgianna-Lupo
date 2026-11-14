@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EDUVERSE — منصة التعليم الإلكتروني والبرمجة المتكاملة</title>
+    <meta
+      name="description"
+      content="منصتك التعليمية الشاملة لتعلم البرمجة والمواد الدراسية مع بث فيديو محمي، امتحانات تفاعلية، محفظة إلكترونية، ومنتدى طلابي."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="EDUVERSE" />
+    <meta property="og:title" content="EDUVERSE — منصة التعليم الإلكتروني والبرمجة المتكاملة" />
+    <meta
+      property="og:description"
+      content="تعلم بذكاء وحقق أهدافك عبر منصة EDUVERSE التعليمية: كورسات منظمة، مشغل فيديو محمي، اختبارات، ومتابعة مستمرة."
+    />
+    <meta property="og:image" content="/assets/eduverse-logo.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="EDUVERSE — منصة التعليم الإلكتروني والبرمجة المتكاملة" />
+    <meta
+      name="twitter:description"
+      content="منصة EDUVERSE التعليمية المتكاملة للتعلم الآمن والامتحانات الذكية."
+    />
+    <meta name="twitter:image" content="/assets/eduverse-logo.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem('eduverse_theme') || 'system';
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = savedTheme === 'dark' || (savedTheme === 'system' && prefersDark);
+          if (isDark) document.documentElement.classList.add('dark');
+          else document.documentElement.classList.remove('dark');
+
+          var savedLang = localStorage.getItem('eduverse_lang') || 'ar';
+          document.documentElement.lang = savedLang === 'en' ? 'en' : 'ar';
+          document.documentElement.dir = savedLang === 'en' ? 'ltr' : 'rtl';
+        } catch (e) {}
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "EDUVERSE",
+        "description": "منصة تعليمية شاملة للبرمجة والعلوم ببث فيديو محمي وامتحانات تفاعلية.",
+        "logo": "/assets/eduverse-logo.png"
+      }
+    </script>
+  </head>
+  <body class="bg-[#F6F7FB] text-[#171B2D] dark:bg-[#0D111D] dark:text-[#F1F5F9] antialiased selection:bg-[#635BFF]/20 selection:text-[#635BFF]">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
