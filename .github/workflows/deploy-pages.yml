@@ -1,4 +1,4 @@
-name: Build and publish EDUVERSE to GitHub Pages
+name: EDUVERSE Build Validation
 
 on:
   workflow_dispatch:
@@ -7,11 +7,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: github-pages
+  group: eduverse-build
   cancel-in-progress: true
 
 jobs:
@@ -29,33 +27,8 @@ jobs:
       - name: Install dependencies from bun.lock
         run: bun install --frozen-lockfile
 
-      - name: Build site
+      - name: Build Vercel-ready site
         run: bun run build
         env:
-          GITHUB_PAGES: 'true'
           VITE_SUPABASE_URL: https://suldaiuxaxremmfxodak.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_2DNkpNQLXsqD10FafiaEIA_9pz90chV
-
-      - name: Prepare GitHub Pages files
-        run: |
-          touch dist/.nojekyll
-          cp dist/index.html dist/404.html
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - name: Show published URL
-        run: echo "EDUVERSE published at ${{ steps.deployment.outputs.page_url }}"
