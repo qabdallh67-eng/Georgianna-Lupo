@@ -653,7 +653,7 @@ export async function createApp() {
         .select('*, course_sections!inner(course_id)')
         .eq('course_sections.course_id', course.id)
         .order('sort_order'),
-      admin.from('lectures').select('*').eq('course_id', course.id).order('sort_order'),
+      admin.from('lectures').select('*, course_parts!inner(course_sections!inner(course_id))').eq('course_parts.course_sections.course_id', course.id).order('sort_order'),
       admin.from('course_materials').select('id, lecture_id, title, material_type, is_downloadable, created_at').eq('course_id', course.id),
       admin.from('exams').select('id, title, duration_minutes, pass_score, max_attempts, is_published').eq('course_id', course.id).eq('is_published', true),
       studentId
