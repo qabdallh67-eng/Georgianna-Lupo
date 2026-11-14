@@ -592,7 +592,7 @@ export async function createApp() {
     if (category) query = query.eq('course_type', category);
     if (grade) query = query.eq('grade_key', grade);
     if (teacher) query = query.eq('instructor_name', teacher);
-    if (search) query = query.or(`title.ilike.%${search}%,instructor_name.ilike.%${search}%`);
+    if (search) query = query.or(`title->>ar.ilike.%${search}%,title->>en.ilike.%${search}%,slug.ilike.%${search}%,instructor_name.ilike.%${search}%`);
 
     const { data, error } = await query;
     if (error) {
