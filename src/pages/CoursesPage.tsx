@@ -27,7 +27,29 @@ export const CoursesPage: React.FC = () => {
 
     apiFetch<{ courses: any[] }>(`/api/courses?${params.toString()}`)
       .then((res) => {
-        if (res.ok && res.data?.courses) setCourses(res.data.courses);
+        if (res.ok && res.data?.courses) {
+          setCourses(
+            res.data.courses.map((course: any) => {
+              const title = course.title && typeof course.title === 'object'
+                ? course.title[lang] || course.title.ar || course.title.en || ''
+                : course.title || '';
+              const description = course.description && typeof course.description === 'object'
+                ? course.description[lang] || course.description.ar || course.description.en || ''
+                : course.description || '';
+              return {
+                ...course,
+                title,
+                title_en: course.title_en || (typeof course.title === 'object' ? course.title.en : ''),
+                description,
+                description_en: course.description_en || (typeof course.description === 'object' ? course.description.en : ''),
+                cover_image_url: course.cover_image_url || '',
+                teacher_name: course.teacher_name || course.instructor_name || '',
+                category: course.category || course.course_type || '',
+                grade_level: course.grade_level || course.grade_key || '',
+              };
+            })
+          );
+        }
       })
       .finally(() => setLoading(false));
   }, [search, category, grade, teacher]);
