@@ -223,7 +223,7 @@ export async function createApp() {
         lessonsCountRes,
       ] = await Promise.all([
         admin.from('site_settings').select('*').eq('id', true).maybeSingle(),
-        admin.from('theme_settings').select('*').eq('id', 1).maybeSingle(),
+        admin.from('theme_settings').select('*').eq('id', true).maybeSingle(),
         admin.from('media_assets').select('*').eq('is_private', false),
         admin.from('navigation_items').select('*').eq('is_visible', true).order('sort_order'),
         admin.from('social_links').select('*').eq('is_visible', true).order('sort_order'),
@@ -232,7 +232,7 @@ export async function createApp() {
           .from('courses')
           .select('id, slug, title, description, cover_asset_id, instructor_name, course_type, grade_key, price, currency, is_published')
           .eq('is_published', true)
-          .order('is_featured', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(6),
         admin.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'student').eq('account_status', 'approved'),
         admin.from('courses').select('id', { count: 'exact', head: true }).eq('is_published', true),
@@ -351,8 +351,8 @@ export async function createApp() {
 
       const { data: settings } = await admin
         .from('site_settings')
-        .select('require_student_approval, default_currency')
-        .eq('id', 1)
+        .select('*')
+        .eq('id', true)
         .maybeSingle();
 
       const requireApproval = settings?.settings?.require_student_approval ?? true;
@@ -585,14 +585,14 @@ export async function createApp() {
 
     let query = admin
       .from('courses')
-      .select('id, slug, title, title_en, description, description_en, cover_image_url, teacher_name, category, grade_level, price, currency, duration_minutes, is_featured, is_published')
+      .select('id, slug, title, description, cover_asset_id, instructor_name, course_type, grade_key, price, currency, is_published')
       .eq('is_published', true)
       .order('created_at', { ascending: false });
 
-    if (category) query = query.eq('category', category);
-    if (grade) query = query.eq('grade_level', grade);
-    if (teacher) query = query.eq('teacher_name', teacher);
-    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%,teacher_name.ilike.%${search}%`);
+    if (category) query = query.eq('course_type', category);
+    if (grade) query = query.eq('grade_key', grade);
+    if (teacher) query = query.eq('instructor_name', teacher);
+    if (search) query = query.or(`title.ilike.%${search}%,instructor_name.ilike.%${search}%`);
 
     const { data, error } = await query;
     if (error) {
